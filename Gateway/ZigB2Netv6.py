@@ -583,10 +583,10 @@ def processPacket(data):
 
 		zb = ZigBee(zbport, callback=packet_received)         #instantiate a Zigbee on the port above
 
-# Do other stuff in the main thread
+# Do other stuff in the main thread - testing - just give queue length and some details on data packet
 while True:
         try:
-                time.sleep(0.1)
+                time.sleep(1)
 		print packet_queue.qsize
                 if packet_queue.qsize() > 0:
                         print packet_queue.qsize
