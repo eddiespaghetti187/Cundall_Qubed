@@ -26,8 +26,8 @@ from collections import defaultdict
 
 zbport = serial.Serial("/dev/ttyAMA0", baudrate=9600, timeout=1.0)    #Open serial port connected to XBEE
 zb = ZigBee(zbport)    #instantiate a Zigbee on the port above
-user_ID = 'cundall'         #User ID used to create Thingspeak account - VITAL
-user_key = 'P13RYTD0TZ2RVA1P'      #write API key - found at https://thingspeak.com/account, allows read & write operations - VITAL
+user_ID = ''         #User ID used to create Thingspeak account - VITAL
+user_key = ''      #write API key - found at https://thingspeak.com/account, allows read & write operations - VITAL
 field1name = 'Dry Bulb Temperature - *C'
 field2name = 'Relative Humidity - %'
 field3name = 'Illuminance - Lux'
