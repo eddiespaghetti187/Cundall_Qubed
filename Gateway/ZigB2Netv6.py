@@ -571,12 +571,23 @@ def ThingspeakProcess(source,sensortype,sensorID_dict,writeKey_dict):
 
 # zbport.close()
 
-zb = ZigBee(zbport, callback=packet_received)         #instantiate a Zigbee on the port above
+def processPacket(data):
+        print 'In handlePacket: ',
+        print data['id'],
+        if data['id'] == 'tx_status':
+                print data['deliver_status'].encode('hex')
+        elif data['id'] == 'rx':
+                print data['rf_data']
+        else:
+                print 'Unimplemented frame type'
+
+		zb = ZigBee(zbport, callback=packet_received)         #instantiate a Zigbee on the port above
 
 # Do other stuff in the main thread
 while True:
         try:
                 time.sleep(0.1)
+		print packet_queue.qsize
                 if packet_queue.qsize() > 0:
                         print packet_queue.qsize
                         # got a packet from recv thread
