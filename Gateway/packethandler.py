@@ -40,8 +40,8 @@ def is_number(s):
 #extract required values from incoming Xbee packet
 def unpacket(packet, sensortype):
     incoming = packet['rf_data']
-    if sensortype == "0":
-        sensortype,RsRo,PM2_5,PM10 = incoming.split(",")       #split data (comma separated values)
+    if sensortype == 0:
+        discardType,RsRo,PM2_5,PM10 = incoming.split(",")       #split data (comma separated values)
         floatRsRo = float(RsRo)
         tvoc = TVOCcalc(RsRo)
         floatTVOC = float(tvoc)
@@ -49,9 +49,9 @@ def unpacket(packet, sensortype):
         intPM2_5 = int(PM2_5)
         return floatTVOC,PM2_5,PM10
 
-    elif sensortype == "1":
+    elif sensortype == 1:
         print "THL Qube"
-        sensortype,hum,temp,light = incoming.split(",")        
+        discardType,hum,temp,light = incoming.split(",")        
         lightReplace = light.replace('\n','')
         tempReplace = temp.replace(' ', '')
         nanLight = is_number(lightReplace)
@@ -60,19 +60,19 @@ def unpacket(packet, sensortype):
         intLight = int(nanLight)
         return floatHum,floatTemp,intLight
 
-    elif sensortype == "2":                                        
+    elif sensortype == 2:                                        
         print "TVOC & Lux Qube - sensor doesn't exist!"
 
-    elif sensortype == "3":
+    elif sensortype == 3:
         print "CO2 Qube"
-        sensortype,CO2 = incoming.split(",")                   
+        discardType,CO2 = incoming.split(",")                   
         intCO2 = int(CO2)
         print CO2                            
         return CO2                          
 
-    elif sensortype == "4":
+    elif sensortype == 4:
         print "PM, VOC & CO2 Qube"
-        sensortype,RsRo,PM2_5,PM10,CO2 = incoming.split(",")   
+        discardType,RsRo,PM2_5,PM10,CO2 = incoming.split(",")   
         tvoc = TVOCcalc(RsRo)
         floatTVOC = float(tvoc)
         intCO2 = int(CO2)
@@ -81,11 +81,10 @@ def unpacket(packet, sensortype):
         print floatTVOC,intPM2_5,intPM10,intCO2
         return floatTVOC,intPM2_5,intPM10,intCO2
 
-    elif sensortype == "5":
+    elif sensortype == 5:
         print "NO2,Temp & Hum Qube"
-        sensortype,intNO2,floatTemp,floatHum = incoming.split(",")
+        discardType,intNO2,floatTemp,floatHum = incoming.split(",")
         print intNO2,floatTemp,floatHum
         return intNO2,floatTemp,floatHum
 
     else:
-        print "Unhandled sensor type" 

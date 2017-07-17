@@ -85,8 +85,8 @@ while True:
         if packetQueue.qsize() > 0:
             newPacket = packetQueue.get_nowait()
             print 'newPacket received'
-            print 'queue length is now', print packetQueue.qsize()
-            incoming = packet['rf_data']
+            print 'queue length is now', packetQueue.qsize()
+            incoming = newPacket['rf_data']
             if incoming[0] == "0":
                 sensortype = 0
                 print "PM & VOC Qube"
