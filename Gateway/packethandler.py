@@ -28,6 +28,15 @@ def TVOCcalc(RsRo):
         print "= ", conc, "mg/m^3"
     return conc
 
+#quick function to replace non-number Lux readings with zero
+def is_number(s):
+    print s
+    if s == "NaN":
+       s = 0
+       return s         
+    else:
+       return s
+
 #extract required values from incoming Xbee packet
 def unpacket(packet):
     incoming = packet['rf_data']
@@ -80,6 +89,6 @@ def unpacket(packet):
         sensortype,intNO2,floatTemp,floatHum = incoming.split(",")
         print sensortype,intNO2,floatTemp,floatHum
         return sensortype,intNO2,floatTemp,floatHum
-        
+
     else:
         print "Unhandled sensor type" 
