@@ -84,7 +84,7 @@ while True:
     try:
         time.sleep(0.1)
         if packetQueue.qsize() > 0:
-        newPacket = packetQueue.get_nowait()
+            newPacket = packetQueue.get_nowait()
             print 'newPacket is'
             print newPacket
             print 'queue length is now',
