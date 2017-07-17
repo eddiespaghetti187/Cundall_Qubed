@@ -56,7 +56,6 @@ intPM2_5 = 0
 light = 0
 PM10 = 0
 PM2_5 = 0
-RsRo = 1.00
 temp = 20.0
 tvoc = 0.9
 
@@ -85,11 +84,37 @@ while True:
         time.sleep(0.1)
         if packetQueue.qsize() > 0:
             newPacket = packetQueue.get_nowait()
-            print 'newPacket is'
-            print newPacket
-            print 'queue length is now',
-            print packetQueue.qsize()
-            packethandler.unpacket(newPacket)
+            print 'newPacket received'
+            print 'queue length is now', print packetQueue.qsize()
+            incoming = packet['rf_data']
+            if incoming[0] == "0":
+                sensortype = 0
+                print "PM & VOC Qube"
+                floatTVOC,PM2_5,PM10 = packethandler.unpacket(incoming, sensortype)
+                print floatTVOC,PM2_5,PM10                
+            elif incoming[0] == "1":
+                sensortype = 1
+                print "THL Qube"
+                floatHum,floatTemp,intLight = packethandler.unpacket(incoming, sensortype)
+                print floatHum,floatTemp,intLight
+            elif incoming[0] == "2":                                        
+                sensortype = 2
+                print "TVOC & Lux Qube - sensor doesn't exist!"
+            elif incoming[0] == "3":
+                sensortype = 3
+                print "CO2 Qube"
+                CO2 = packethandler.unpacket(incoming,sensortype)
+                print CO2                            
+            elif incoming[0] == "4":
+                sensortype = 4
+                print "PM, VOC & CO2 Qube"
+                floatTVOC,intPM2_5,intPM10,intCO2 = packethandler.unpacket(incoming,sensortype)
+                print floatTVOC,intPM2_5,intPM10,intCO2
+            elif incoming[0] == "5":
+                print "NO2 Qube"
+                sensortype = 5
+                intNO2,floatTemp,floatHum = packethandler.unpacket(incoming,sensortype)
+                print intNO2,floatTemp,floatHum
     except KeyboardInterrupt:
         break
 
