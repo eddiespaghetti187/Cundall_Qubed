@@ -1,7 +1,7 @@
 #! /usr/bin/python
 
 import math
-import time
+import datetime
 
 #Regressed sensitivity curves constants for Rs/Ro to ppm from sensor manufacturer's datasheet
 #C7H8Curve = [37.22590719,2.078062258]                      #TGS2602 (0.3;1)( 0.8;10) (0.4;30)
@@ -30,7 +30,6 @@ def TVOCcalc(RsRo):
 
 #quick function to replace non-number Lux readings with zero
 def is_number(s):
-    print s
     if s == "NaN":
        s = 0
        return s         
@@ -39,52 +38,51 @@ def is_number(s):
 
 #extract required values from incoming Xbee packet
 def unpacket(packet, sensortype):
-    incoming = packet['rf_data']
+    tStamp = '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now())
     if sensortype == 0:
-        discardType,RsRo,PM2_5,PM10 = incoming.split(",")       #split data (comma separated values)
+        print "TVOC,PM2.5,PM10 Qube"
+        discard,RsRo,PM2_5,PM10 = packet.split(",")       #split data (comma separated values)
         floatRsRo = float(RsRo)
         tvoc = TVOCcalc(RsRo)
         floatTVOC = float(tvoc)
         intPM10 = int(PM10)
         intPM2_5 = int(PM2_5)
-        return floatTVOC,PM2_5,PM10
+        return tStamp,floatTVOC,PM2_5,PM10
 
     elif sensortype == 1:
         print "THL Qube"
-        discardType,hum,temp,light = incoming.split(",")        
+        discard,hum,temp,light = packet.split(",")        
         lightReplace = light.replace('\n','')
         tempReplace = temp.replace(' ', '')
         nanLight = is_number(lightReplace)
         floatHum = float(hum)
         floatTemp = float(tempReplace)
         intLight = int(nanLight)
-        return floatHum,floatTemp,intLight
+        return tStamp,floatHum,floatTemp,intLight
 
     elif sensortype == 2:                                        
-        print "TVOC & Lux Qube - sensor doesn't exist!"
+        print "CO2,Temp,Hum,Lux Qube - sensor doesn't exist!"
 
     elif sensortype == 3:
         print "CO2 Qube"
-        discardType,CO2 = incoming.split(",")                   
+        discard,CO2 = packet.split(",")                   
         intCO2 = int(CO2)
-        print CO2                            
-        return CO2                          
+        return tStamp,CO2                          
 
     elif sensortype == 4:
         print "PM, VOC & CO2 Qube"
-        discardType,RsRo,PM2_5,PM10,CO2 = incoming.split(",")   
+        discard,RsRo,PM2_5,PM10,CO2 = packet.split(",")   
         tvoc = TVOCcalc(RsRo)
         floatTVOC = float(tvoc)
         intCO2 = int(CO2)
         intPM10 = int(PM10)
         intPM2_5 = int(PM2_5)
-        print floatTVOC,intPM2_5,intPM10,intCO2
-        return floatTVOC,intPM2_5,intPM10,intCO2
+        return tStamp,floatTVOC,intPM2_5,intPM10,intCO2
 
     elif sensortype == 5:
         print "NO2,Temp & Hum Qube"
-        discardType,intNO2,floatTemp,floatHum = incoming.split(",")
-        print intNO2,floatTemp,floatHum
-        return intNO2,floatTemp,floatHum
+        discard,intNO2,floatTemp,floatHum = packet.split(",")
+        return tStamp,intNO2,floatTemp,floatHum
 
     else:
+        print "unhandled sensor type"

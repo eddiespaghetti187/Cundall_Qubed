@@ -62,16 +62,12 @@ tvoc = 0.9
 # Open serial port
 xbeeSerial = serial.Serial(PORT, BAUD_RATE)
 
+# read calibration files
+Calib_CSV=csv.DictReader(open('Calib_CSV.csv','rb'))
+
 #receives packet data and places it into the queue
 def packet_received(data):
     packetQueue.put(data, block = False)
-    print 'queue length is',
-    print packetQueue.qsize()
-
-#creates a timestamp for log purposes only - NEED TO UPDATE TO SEND TIMESTAMP TO THINGSPEAK WITH DATA
-def timestamp():
-    stamp = time.strftime("%a, %d %b %Y %H:%M:%S ",time.localtime(time.time()))
-    return stamp
 
 # Create API object, which spawns a new thread
 xbee = ZigBee(xbeeSerial, callback=packet_received)
@@ -86,35 +82,39 @@ while True:
             newPacket = packetQueue.get_nowait()
             print 'newPacket received'
             print 'queue length is now', packetQueue.qsize()
+            source = newPacket['source_addr_long'].encode('hex')
             incoming = newPacket['rf_data']
-            if incoming[0] == "0":
+            if incoming[0] == "0":	#PM+VOC Qube
                 sensortype = 0
-                print "PM & VOC Qube"
-                floatTVOC,PM2_5,PM10 = packethandler.unpacket(incoming, sensortype)
-                print floatTVOC,PM2_5,PM10                
-            elif incoming[0] == "1":
+                stamp,floatTVOC,PM2_5,PM10 = packethandler.unpacket(incoming, sensortype)
+                print stamp,floatTVOC,PM2_5,PM10                
+                print " " 
+            elif incoming[0] == "1":	#Temp+Hum+Lux Qube
                 sensortype = 1
-                print "THL Qube"
-                floatHum,floatTemp,intLight = packethandler.unpacket(incoming, sensortype)
-                print floatHum,floatTemp,intLight
-            elif incoming[0] == "2":                                        
+                stamp,floatHum,floatTemp,intLight = packethandler.unpacket(incoming, sensortype)
+                print stamp,floatHum,floatTemp,intLight
+                calibration.calibrate_1(Calib_CSV,source,sensortype,floatTemp,floatHum,intLight)
+                print " " 
+            elif incoming[0] == "2":	#Temp,Hum,Lux,CO2 Qube
                 sensortype = 2
-                print "TVOC & Lux Qube - sensor doesn't exist!"
-            elif incoming[0] == "3":
+                print "THLCO2 Qube - doesn't exist yet!"
+                print " " 
+            elif incoming[0] == "3":	#CO2 Qube
                 sensortype = 3
-                print "CO2 Qube"
-                CO2 = packethandler.unpacket(incoming,sensortype)
-                print CO2                            
-            elif incoming[0] == "4":
+                stamp,CO2 = packethandler.unpacket(incoming,sensortype)
+                print stamp,CO2                            
+                print " " 
+            elif incoming[0] == "4":	#PM,VOC,CO2 Qube
                 sensortype = 4
-                print "PM, VOC & CO2 Qube"
-                floatTVOC,intPM2_5,intPM10,intCO2 = packethandler.unpacket(incoming,sensortype)
-                print floatTVOC,intPM2_5,intPM10,intCO2
-            elif incoming[0] == "5":
-                print "NO2 Qube"
+                stamp,floatTVOC,intPM2_5,intPM10,intCO2 = packethandler.unpacket(incoming,sensortype)
+                print stamp,floatTVOC,intPM2_5,intPM10,intCO2
+                print " " 
+            elif incoming[0] == "5":	#NO2,Temp,Hum Qube
                 sensortype = 5
-                intNO2,floatTemp,floatHum = packethandler.unpacket(incoming,sensortype)
-                print intNO2,floatTemp,floatHum
+                stamp,intNO2,floatTemp,floatHum = packethandler.unpacket(incoming,sensortype)
+                print stamp,intNO2,floatTemp,floatHum,
+                print " " 
+
     except KeyboardInterrupt:
         break
 
