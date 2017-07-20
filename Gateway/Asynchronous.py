@@ -12,6 +12,7 @@ from xbee import ZigBee
 from collections import defaultdict
 
 import packethandler
+import calibration
 
 PORT = '/dev/ttyAMA0'
 BAUD_RATE = 9600
@@ -80,20 +81,22 @@ while True:
         time.sleep(0.1)
         if packetQueue.qsize() > 0:
             newPacket = packetQueue.get_nowait()
-            print 'newPacket received'
+            print 'Packet received'
             print 'queue length is now', packetQueue.qsize()
             source = newPacket['source_addr_long'].encode('hex')
             incoming = newPacket['rf_data']
+            Calib_CSV=csv.DictReader(open('Calib_CSV.csv','rb'))
             if incoming[0] == "0":	#PM+VOC Qube
                 sensortype = 0
                 stamp,floatTVOC,PM2_5,PM10 = packethandler.unpacket(incoming, sensortype)
-                print stamp,floatTVOC,PM2_5,PM10                
+                calibTVOC,calibPM2_5,calibPM10 = calibration.calibrate_0(Calib_CSV,source,sensortype,floatTVOC,PM2_5,PM10)
+                print stamp,calibTVOC,calibPM2_5,calibPM10                
                 print " " 
             elif incoming[0] == "1":	#Temp+Hum+Lux Qube
                 sensortype = 1
                 stamp,floatHum,floatTemp,intLight = packethandler.unpacket(incoming, sensortype)
-                print stamp,floatHum,floatTemp,intLight
-                calibration.calibrate_1(Calib_CSV,source,sensortype,floatTemp,floatHum,intLight)
+                calibTemp,calibHum,calibLight = calibration.calibrate_1(Calib_CSV,source,sensortype,floatTemp,floatHum,intLight)
+                print stamp,calibTemp,calibHum,calibLight
                 print " " 
             elif incoming[0] == "2":	#Temp,Hum,Lux,CO2 Qube
                 sensortype = 2
@@ -102,17 +105,20 @@ while True:
             elif incoming[0] == "3":	#CO2 Qube
                 sensortype = 3
                 stamp,CO2 = packethandler.unpacket(incoming,sensortype)
-                print stamp,CO2                            
+                calibCO2 = calibration.calibrate_3(Calib_CSV,source,sensortype,CO2)
+                print stamp, calibCO2
                 print " " 
             elif incoming[0] == "4":	#PM,VOC,CO2 Qube
                 sensortype = 4
                 stamp,floatTVOC,intPM2_5,intPM10,intCO2 = packethandler.unpacket(incoming,sensortype)
-                print stamp,floatTVOC,intPM2_5,intPM10,intCO2
+                calibTVOC,calibPM2_5,calibPM10,calibCO2 = calibration.calibrate_4(Calib_CSV,source,sensortype,floatTVOC,intPM2_5,intPM10,intCO2)
+                print stamp,calibTVOC,calibPM2_5,calibPM10,calibCO2
                 print " " 
             elif incoming[0] == "5":	#NO2,Temp,Hum Qube
                 sensortype = 5
                 stamp,intNO2,floatTemp,floatHum = packethandler.unpacket(incoming,sensortype)
-                print stamp,intNO2,floatTemp,floatHum,
+                calibNO2,calibTemp,calibHum = calibration.calibrate_5(Calib_CSV,source,sensortype,intNO2,floatTemp,floatHum)
+                print stamp,calibNO2,calibTemp,calibHum
                 print " " 
 
     except KeyboardInterrupt:

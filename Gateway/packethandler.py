@@ -17,15 +17,15 @@ def TVOCcalc(RsRo):
     tvoc = ((NH3_Curve[0]*pow(x,5))+(NH3_Curve[1]*pow(x,4))+(NH3_Curve[2]*pow(x,3))+(NH3_Curve[3]*pow(x,2)+NH3_Curve[4]*x)+NH3_Curve[5])
     if tvoc < 0:
         tvoc = 0
-        print "Rs/Ro= ",RsRo
-        print "= ", tvoc, "ppm"
+#        print "Rs/Ro= ",RsRo
+#        print "= ", tvoc, "ppm"
         conc = 0.00
     else:
         #concentration(mg/m3) = concentration(ppm) X ( molar mass(g/mol) / molar volume(L) )
-        print "Rs/Ro= ",RsRo
-        print "= ",tvoc, "ppm"
+#        print "Rs/Ro= ",RsRo
+#        print "= ",tvoc, "ppm"
         conc = round(tvoc*(NH3_MMass/Mvolume),2)
-        print "= ", conc, "mg/m^3"
+#        print "= ", conc, "mg/m^3"
     return conc
 
 #quick function to replace non-number Lux readings with zero
@@ -47,7 +47,7 @@ def unpacket(packet, sensortype):
         floatTVOC = float(tvoc)
         intPM10 = int(PM10)
         intPM2_5 = int(PM2_5)
-        return tStamp,floatTVOC,PM2_5,PM10
+        return tStamp,floatTVOC,intPM2_5,intPM10
 
     elif sensortype == 1:
         print "THL Qube"
@@ -67,7 +67,7 @@ def unpacket(packet, sensortype):
         print "CO2 Qube"
         discard,CO2 = packet.split(",")                   
         intCO2 = int(CO2)
-        return tStamp,CO2                          
+        return tStamp,intCO2                          
 
     elif sensortype == 4:
         print "PM, VOC & CO2 Qube"
@@ -86,3 +86,4 @@ def unpacket(packet, sensortype):
 
     else:
         print "unhandled sensor type"
+        return
